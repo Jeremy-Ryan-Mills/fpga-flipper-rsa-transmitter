@@ -1,0 +1,4 @@
+manifest:
+  app_name: "fpga_rsa_encryption"
+  app_type: "CLI"
+  entry_point: "flipper_transmission.c"
