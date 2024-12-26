@@ -4,7 +4,7 @@ App(
     name="FPGA RSA Encryption",
     entry_point="main",
     stack_size=2 * 1024,
-    requires=["some_dependency"],
+    requires=["furi_hall", "furi_core"],
     conflicts=["conflicting_app"],
     provides=["fpga_rsa"],
     order=50,
