@@ -1,4 +1,11 @@
-manifest:
-  app_name: "fpga_rsa_encryption"
-  app_type: "CLI"
-  entry_point: "flipper_transmission.c"
+App(
+    appid="fpga_rsa_encryption",
+    apptype=FlipperAppType.EXTERNAL,
+    name="FPGA RSA Encryption",
+    entry_point="main",
+    stack_size=2 * 1024,
+    requires=["some_dependency"],
+    conflicts=["conflicting_app"],
+    provides=["fpga_rsa"],
+    order=50,
+)
