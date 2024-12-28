@@ -10,11 +10,12 @@
 
 #define FURI_CONFIG_THREAD_STACK_SIZE 1024
 #define FREQUENCY 433920000
+#define MESSAGE_LENGTH 8
 
 /***
 *  Takes readings from 2 gpio pins for I2C communication.
 */
-void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint64_t* message, size_t length) {
+void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t length) {
     /* 8-bit message without I2C
     if (!message) {
         return; // Ensure the message pointer is valid
@@ -31,7 +32,7 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint64_t* message, size_t 
     }
      */
 
-    if (!message || length == 0) {
+    if (!message || length != MESSAGE_LENGTH) {
         return; // Validate inputs
     }
 
@@ -49,9 +50,9 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint64_t* message, size_t 
     furi_hal_gpio_init(&scl, GpioModeInput, GpioPullUp, GpioSpeedLow);
     furi_hal_gpio_init(&sda, GpioModeInput, GpioPullUp, GpioSpeedLow);
 
-    size_t byte_index = 0;
     uint8_t bit_index = 0;
     uint8_t current_byte = 0;
+    size_t byte_index = 0;
 
     while (byte_index < length) {
         // Wait for SCL to go high (clock synchronization)
@@ -79,7 +80,11 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint64_t* message, size_t 
 /***
 * Takes message found in the GPIO pins and transmits it in 433.92 MHz radio
 */
-int transmit_message(uint64_t* message, size_t length) {
+int transmit_message(uint8_t* message, size_t length) {
+    if (length != MESSAGE_LENGTH) {
+        return -1; // Ensure correct length
+    }
+
     furi_hal_subghz_flush_tx();
     uint32_t real_frequency = furi_hal_subghz_set_frequency_and_path(FREQUENCY);
 
@@ -89,11 +94,7 @@ int transmit_message(uint64_t* message, size_t length) {
         return -1;
     }
 
-    uint8_t chopped_message[8];
-    for (int i = 0; i < 8; i++) {
-        chopped_message[i] = (*message >> (8 * (7 - i))) & 0xFF; // Extract each byte
-    }
-    furi_hal_subghz_write_packet(chopped_message, (uint64_t)length);
+    furi_hal_subghz_write_packet(message, length);
 
     if (furi_hal_subghz_tx()) {
         FURI_LOG_I("SubGHz", "Message transmitted successfully.");
@@ -109,7 +110,7 @@ int transmit_message(uint64_t* message, size_t length) {
 /***
 * Renders the GUI with frequency, encrypted message, and a transmit button.
 */
-void render_gui(uint64_t* message, size_t length, bool transmitted) {
+void render_gui(uint8_t* message, size_t length, bool transmitted) {
     ViewPort* viewport = view_port_alloc();
     Canvas* canvas = viewport->canvas;
 
@@ -134,18 +135,18 @@ void render_gui(uint64_t* message, size_t length, bool transmitted) {
 int flipper_transmission(void* p) {
     UNUSED(p);
 
-    uint64_t* encrypted_message;
-    // Change for whatever pins I want to use for I2C
-    read_gpio_pins(4, 5, encrypted_message, sizeof(encrypted_message));
+    uint8_t encrypted_message[MESSAGE_LENGTH] = {0}; // Initialize message array
+    read_gpio_pins(4, 5, encrypted_message, MESSAGE_LENGTH);
 
-    render_gui(encrypted_message, sizeof(encrypted_message), false);
+    render_gui(encrypted_message, MESSAGE_LENGTH, false);
 
     while (1) {
-        if (transmit_message(encrypted_message, sizeof(encrypted_message)) == 0) {
-            render_gui(encrypted_message, sizeof(encrypted_message), true);
+        if (transmit_message(encrypted_message, MESSAGE_LENGTH) == 0) {
+            render_gui(encrypted_message, MESSAGE_LENGTH, true);
         } else {
-            render_gui(encrypted_message, sizeof(encrypted_message), false);
+            render_gui(encrypted_message, MESSAGE_LENGTH, false);
         }
+        furi_delay_ms(1000); // Prevent CPU overload
     }
     return 0;
 }
