@@ -55,13 +55,15 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
     size_t byte_index = 0;
 
     while (byte_index < length) {
+        size_t timeout = 1000;
         // Wait for SCL to go high (clock synchronization)
-        while (!furi_hal_gpio_read(&scl)) {}
+        while (!furi_hal_gpio_read(&scl) && timeout--) {
+            furi_delay_ms(1);
+        }
+        if (timeout == 0) break;
 
         // Read SDA for the data bit
         uint8_t bit = furi_hal_gpio_read(&sda);
-
-        // Accumulate the bit into the current byte
         current_byte = (current_byte << 1) | bit;
         bit_index++;
 
@@ -72,7 +74,11 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
         }
 
         // Wait for SCL to go low (end of clock cycle)
-        while (furi_hal_gpio_read(&scl)) {}
+        timeout = 1000;
+        while (furi_hal_gpio_read(&scl) && timeout--) {
+            furi_delay_ms(1);
+        }
+        if (timeout == 0) break;
     }
 }
 
@@ -107,49 +113,79 @@ int transmit_message(uint8_t* message, size_t length) {
     return 0;
 }
 
+
 /***
-* Renders the GUI with frequency, encrypted message, and a transmit button.
-*/
-void render_gui(uint8_t* message, size_t length, bool transmitted) {
-    ViewPort* viewport = view_port_alloc();
-    Canvas* canvas = viewport->canvas;
-
-    char display_message[64];
-    snprintf(display_message, sizeof(display_message), "Freq: %lu Hz\nMessage: ", FREQUENCY);
-
-    for (size_t i = 0; i < length; i++) {
-        snprintf(display_message + strlen(display_message), sizeof(display_message) - strlen(display_message), "%02X", message[i]);
+ * Renders the GUI with frequency, encrypted message, and a transmit button.
+ */
+void render_gui(Canvas* canvas, uint8_t* message, size_t length, bool transmitted) {
+    if (!message || length != MESSAGE_LENGTH) {
+        return; // Validate inputs
     }
 
+    char display_message[128] = {0};
+    snprintf(display_message, sizeof(display_message), "Freq: %lu Hz\nMessage: ", (unsigned long)FREQUENCY);
+
+    for (size_t i = 0; i < length; i++) {
+        snprintf(display_message + strlen(display_message),
+                 sizeof(display_message) - strlen(display_message),
+                 "%02X", message[i]);
+    }
+
+    // Draw on the canvas
     canvas_clear(canvas);
     canvas_draw_str(canvas, 0, 10, display_message);
     canvas_draw_str(canvas, 0, 30, transmitted ? "Status: Transmitted" : "Status: Ready");
     canvas_draw_str(canvas, 0, 50, "Press OK to Transmit");
-
-    view_port_update(viewport);
 }
 
 /***
-* Function ran on entry
-*/
-int flipper_transmission(void* p) {
-    UNUSED(p);
+ * Callback to handle drawing on the ViewPort.
+ */
+void draw_callback(Canvas* canvas, void* context) {
+    uint8_t* encrypted_message = ((uint8_t**)context)[0];
+    bool* transmitted = ((bool**)context)[1];
+    render_gui(canvas, encrypted_message, MESSAGE_LENGTH, *transmitted);
+}
 
-    uint8_t encrypted_message[MESSAGE_LENGTH] = {0}; // Initialize message array
+/***
+ * Function ran on entry
+ */
+long flipper_transmission(void* p) {
+    UNUSED(p);
+    uint8_t encrypted_message[MESSAGE_LENGTH] = {0};
+    bool transmitted = false;
+
+    // Simulated message reading
     read_gpio_pins(4, 5, encrypted_message, MESSAGE_LENGTH);
 
-    render_gui(encrypted_message, MESSAGE_LENGTH, false);
+    // Allocate ViewPort and set up the GUI
+    ViewPort* view_port = view_port_alloc();
+    if (view_port == NULL) {
+        FURI_LOG_E("GUI", "Failed to allocate ViewPort");
+        return -1;
+    }
+
+    void* context[] = {encrypted_message, &transmitted};
+
+    view_port_draw_callback_set(view_port, draw_callback, context);
+
+    // Attach the ViewPort to the GUI
+    Gui* gui = furi_record_open("gui");
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     while (1) {
-        if (transmit_message(encrypted_message, MESSAGE_LENGTH) == 0) {
-            render_gui(encrypted_message, MESSAGE_LENGTH, true);
-        } else {
-            render_gui(encrypted_message, MESSAGE_LENGTH, false);
-        }
-        furi_delay_ms(1000); // Prevent CPU overload
+        transmitted = transmit_message(encrypted_message, MESSAGE_LENGTH) == 0;
+        view_port_update(view_port); // Trigger GUI update
+        furi_delay_ms(1000);        // Prevent CPU overload
     }
+
+    gui_remove_view_port(gui, view_port);
+    view_port_free(view_port);
+    furi_record_close("gui");
+
     return 0;
 }
+
 
 // Entry point for application
 int main() {
