@@ -12,38 +12,24 @@
 #define FREQUENCY 433920000
 #define MESSAGE_LENGTH 8
 
+
 /***
 *  Takes readings from 2 gpio pins for I2C communication.
 */
 void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t length) {
-    /* 8-bit message without I2C
-    if (!message) {
-        return; // Ensure the message pointer is valid
-    }
-
-    for (size_t i = 0; i < length; i++) {
-        GpioPin pin = {
-            .port = GPIOC,
-            .pin = (1U << i) // Assigns the corresponding pin based on index
-        };
-
-        furi_hal_gpio_init(&pin, GpioModeInput, GpioPullUp, GpioSpeedLow);
-        message[i] = (uint8_t)furi_hal_gpio_read(&pin);
-    }
-     */
 
     if (!message || length != MESSAGE_LENGTH) {
         return; // Validate inputs
     }
 
     GpioPin scl = {
-        .port = GPIOC,
-        .pin = (1U << scl_pin)
+        .port = GPIOA, // Maps to GPIOA
+        .pin = scl_pin // Maps to Pin 7 (A7)
     };
 
     GpioPin sda = {
-        .port = GPIOC,
-        .pin = (1U << sda_pin)
+        .port = GPIOA, // Maps to GPIOA
+        .pin = sda_pin // Maps to Pin 6 (A6)
     };
 
     // Initialize GPIO pins for input
@@ -150,13 +136,13 @@ void draw_callback(Canvas* canvas, void* context) {
 /***
  * Function ran on entry
  */
-long flipper_transmission(void* p) {
+int32_t flipper_transmission(void* p) {
     UNUSED(p);
     uint8_t encrypted_message[MESSAGE_LENGTH] = {0};
     bool transmitted = false;
 
     // Simulated message reading
-    read_gpio_pins(4, 5, encrypted_message, MESSAGE_LENGTH);
+    read_gpio_pins(7, 6, encrypted_message, MESSAGE_LENGTH);
 
     // Allocate ViewPort and set up the GUI
     ViewPort* view_port = view_port_alloc();
@@ -166,7 +152,6 @@ long flipper_transmission(void* p) {
     }
 
     void* context[] = {encrypted_message, &transmitted};
-
     view_port_draw_callback_set(view_port, draw_callback, context);
 
     // Attach the ViewPort to the GUI
