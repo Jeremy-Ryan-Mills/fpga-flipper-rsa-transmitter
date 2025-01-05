@@ -12,6 +12,13 @@
 #define FREQUENCY 433920000
 #define MESSAGE_LENGTH 8
 
+const uint32_t LL_GPIO_PIN_LOOKUP[] = {
+    LL_GPIO_PIN_0, LL_GPIO_PIN_1, LL_GPIO_PIN_2, LL_GPIO_PIN_3,
+    LL_GPIO_PIN_4, LL_GPIO_PIN_5, LL_GPIO_PIN_6, LL_GPIO_PIN_7,
+    LL_GPIO_PIN_8, LL_GPIO_PIN_9, LL_GPIO_PIN_10, LL_GPIO_PIN_11,
+    LL_GPIO_PIN_12, LL_GPIO_PIN_13, LL_GPIO_PIN_14, LL_GPIO_PIN_15
+};
+
 typedef struct {
     uint8_t message[MESSAGE_LENGTH];
     bool transmitted;
@@ -29,19 +36,19 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
 
     GpioPin scl = {
         .port = GPIOA, // Maps to GPIOA
-        .pin = scl_pin // Maps to Pin 7 (A7)
+        .pin = (uint16_t) LL_GPIO_PIN_LOOKUP[scl_pin] // Maps to Pin 7 (A7)
     };
 
     GpioPin sda = {
         .port = GPIOA, // Maps to GPIOA
-        .pin = sda_pin // Maps to Pin 6 (A6)
+        .pin = (uint16_t) LL_GPIO_PIN_LOOKUP[sda_pin] // Maps to Pin 6 (A6)
     };
 
 
     // Initialize GPIO pins for input
     furi_hal_gpio_init(&scl, GpioModeInput, GpioPullUp, GpioSpeedLow);
     furi_hal_gpio_init(&sda, GpioModeInput, GpioPullUp, GpioSpeedLow);
-	/*
+
     uint8_t bit_index = 0;
     uint8_t current_byte = 0;
     size_t byte_index = 0;
@@ -73,7 +80,7 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
         }
         if (timeout == 0) break;
     }
-     */
+
 }
 
 
@@ -142,8 +149,8 @@ void draw_callback(Canvas* canvas, void* context) {
 /***
  * Function ran on entry
  */
-int32_t flipper_transmission(void* p) {
-    UNUSED(p);
+int32_t flipper_transmission() {
+    //UNUSED(p);
 
     GuiContext gui_context = {.transmitted = false};
     read_gpio_pins(7, 6, gui_context.message, MESSAGE_LENGTH);
@@ -172,14 +179,15 @@ int32_t flipper_transmission(void* p) {
 }
 
 
+/*
 // Entry point for application
 int main() {
 
-    uint8_t message[MESSAGE_LENGTH];
-    read_gpio_pins(7, 6, message, MESSAGE_LENGTH);
+    //uint8_t message[MESSAGE_LENGTH];
+    //read_gpio_pins(7, 6, message, MESSAGE_LENGTH);
     //transmit_message(message, MESSAGE_LENGTH);
-    return 0;
-    /*
+
+
     // Create the flipper_transmission thread
     FuriThread* thread = furi_thread_alloc_ex(
         "flipper_transmission",
@@ -192,5 +200,7 @@ int main() {
     }
     //furi_thread_start(thread);
     return 0;
-     */
+
 }
+
+ */

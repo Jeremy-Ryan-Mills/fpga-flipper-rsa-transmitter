@@ -2,7 +2,7 @@ App(
     appid="fpga_rsa_encryption",
     apptype=FlipperAppType.EXTERNAL,
     name="FPGA RSA Encryption",
-    entry_point="main",
+    entry_point="flipper_transmission",
     stack_size=2 * 1024,
     requires=["furi_hall", "furi_core"],
     conflicts=["conflicting_app"],
