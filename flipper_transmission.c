@@ -12,6 +12,10 @@
 #define FREQUENCY 433920000
 #define MESSAGE_LENGTH 8
 
+typedef struct {
+    uint8_t message[MESSAGE_LENGTH];
+    bool transmitted;
+} GuiContext;
 
 /***
 *  Takes readings from 2 gpio pins for I2C communication.
@@ -21,6 +25,7 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
     if (!message || length != MESSAGE_LENGTH) {
         return; // Validate inputs
     }
+
 
     GpioPin scl = {
         .port = GPIOA, // Maps to GPIOA
@@ -32,13 +37,15 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
         .pin = sda_pin // Maps to Pin 6 (A6)
     };
 
+
     // Initialize GPIO pins for input
     furi_hal_gpio_init(&scl, GpioModeInput, GpioPullUp, GpioSpeedLow);
     furi_hal_gpio_init(&sda, GpioModeInput, GpioPullUp, GpioSpeedLow);
-
+	/*
     uint8_t bit_index = 0;
     uint8_t current_byte = 0;
     size_t byte_index = 0;
+
 
     while (byte_index < length) {
         size_t timeout = 1000;
@@ -66,6 +73,7 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
         }
         if (timeout == 0) break;
     }
+     */
 }
 
 
@@ -103,24 +111,24 @@ int transmit_message(uint8_t* message, size_t length) {
 /***
  * Renders the GUI with frequency, encrypted message, and a transmit button.
  */
-void render_gui(Canvas* canvas, uint8_t* message, size_t length, bool transmitted) {
-    if (!message || length != MESSAGE_LENGTH) {
-        return; // Validate inputs
+void render_gui(Canvas* canvas, GuiContext* context) {
+    if (!context || MESSAGE_LENGTH != sizeof(context->message)) {
+        FURI_LOG_E("GUI", "Invalid context");
+        return;
     }
 
     char display_message[128] = {0};
     snprintf(display_message, sizeof(display_message), "Freq: %lu Hz\nMessage: ", (unsigned long)FREQUENCY);
 
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < MESSAGE_LENGTH; i++) {
         snprintf(display_message + strlen(display_message),
                  sizeof(display_message) - strlen(display_message),
-                 "%02X", message[i]);
+                 "%02X", context->message[i]);
     }
 
-    // Draw on the canvas
     canvas_clear(canvas);
     canvas_draw_str(canvas, 0, 10, display_message);
-    canvas_draw_str(canvas, 0, 30, transmitted ? "Status: Transmitted" : "Status: Ready");
+    canvas_draw_str(canvas, 0, 30, context->transmitted ? "Status: Transmitted" : "Status: Ready");
     canvas_draw_str(canvas, 0, 50, "Press OK to Transmit");
 }
 
@@ -128,9 +136,7 @@ void render_gui(Canvas* canvas, uint8_t* message, size_t length, bool transmitte
  * Callback to handle drawing on the ViewPort.
  */
 void draw_callback(Canvas* canvas, void* context) {
-    uint8_t* encrypted_message = ((uint8_t**)context)[0];
-    bool* transmitted = ((bool**)context)[1];
-    render_gui(canvas, encrypted_message, MESSAGE_LENGTH, *transmitted);
+    render_gui(canvas, (GuiContext*)context);
 }
 
 /***
@@ -138,30 +144,24 @@ void draw_callback(Canvas* canvas, void* context) {
  */
 int32_t flipper_transmission(void* p) {
     UNUSED(p);
-    uint8_t encrypted_message[MESSAGE_LENGTH] = {0};
-    bool transmitted = false;
 
-    // Simulated message reading
-    read_gpio_pins(7, 6, encrypted_message, MESSAGE_LENGTH);
+    GuiContext gui_context = {.transmitted = false};
+    read_gpio_pins(7, 6, gui_context.message, MESSAGE_LENGTH);
 
-    // Allocate ViewPort and set up the GUI
     ViewPort* view_port = view_port_alloc();
-    if (view_port == NULL) {
+    if (!view_port) {
         FURI_LOG_E("GUI", "Failed to allocate ViewPort");
         return -1;
     }
 
-    void* context[] = {encrypted_message, &transmitted};
-    view_port_draw_callback_set(view_port, draw_callback, context);
-
-    // Attach the ViewPort to the GUI
+    view_port_draw_callback_set(view_port, draw_callback, &gui_context);
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     while (1) {
-        transmitted = transmit_message(encrypted_message, MESSAGE_LENGTH) == 0;
-        view_port_update(view_port); // Trigger GUI update
-        furi_delay_ms(1000);        // Prevent CPU overload
+        gui_context.transmitted = (transmit_message(gui_context.message, MESSAGE_LENGTH) == 0);
+        view_port_update(view_port);
+        furi_delay_ms(1000);
     }
 
     gui_remove_view_port(gui, view_port);
@@ -174,6 +174,12 @@ int32_t flipper_transmission(void* p) {
 
 // Entry point for application
 int main() {
+
+    uint8_t message[MESSAGE_LENGTH];
+    read_gpio_pins(7, 6, message, MESSAGE_LENGTH);
+    //transmit_message(message, MESSAGE_LENGTH);
+    return 0;
+    /*
     // Create the flipper_transmission thread
     FuriThread* thread = furi_thread_alloc_ex(
         "flipper_transmission",
@@ -182,8 +188,9 @@ int main() {
         NULL
     );
     if (thread == NULL) {
-        return -1;
+        FURI_LOG_E("THREAD", "Failed to allocate thread");
     }
-    furi_thread_start(thread);
+    //furi_thread_start(thread);
     return 0;
+     */
 }
