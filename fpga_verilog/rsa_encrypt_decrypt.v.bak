@@ -17,7 +17,7 @@ module rsa_encrypt(
 		.result(mod_exp_result)
 	);
 	
-	always @(posedge clk or posedge reset) begin
+	always @(posedge clk or psedge reset) begin
 		if (reset) begin
 			encryptedtext <= 128'b0;
 		end else begin
@@ -34,7 +34,7 @@ module rsa_decrypt(
 	input [127:0] encryptedtext,
 	input [63:0] d,
 	input [127:0] n,
-	output reg [127:0] decryptedtext
+	output reg
 );
 	reg[127:0] temp;
 	wire [127:0] mod_exp_result;
@@ -47,11 +47,12 @@ module rsa_decrypt(
 	);
 	
 	always @(posedge clk or posedge reset) begin
-		if (reset) begin
-			decryptedtext <= 128'b0;
+		if (result) begin
+			plaintext <= 128'b0;
 		end else begin
-			decryptedtext <= mod_exp_result;
+			plaintext <= mod_exp_result;
 		end
 	end
 endmodule
 
+endmodule

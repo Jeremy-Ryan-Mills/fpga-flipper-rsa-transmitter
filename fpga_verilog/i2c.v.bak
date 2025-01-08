@@ -5,10 +5,10 @@ module i2c_receiver(
 	input i2c_sda, // Data line
 	input i2c_scl, // Clock line
 	output reg [127:0] message,
-	output reg message_ready,
+	output reg message_ready
 	output reg [7:0] slave_address, // Should be FPGA address
 	output reg read_write, // Read/Write 
-	output reg ack_received
+	outpute reg ack_received
 );
 
 	reg [7:0] byte_buffer;

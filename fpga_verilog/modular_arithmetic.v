@@ -1,5 +1,5 @@
 // Modular multiplication with 32-bit inputs
-module mod_mult(input [127:0] a, b, input [127:0] mod, output [31:0] result);
+module mod_mult(input [127:0] a, b, input [127:0] mod, output reg [31:0] result);
 	reg [255:0] temp;
 	always @(*) begin
 		temp = a * b;
@@ -9,7 +9,7 @@ endmodule
 
 
 // Modular exponentiation with 32-bit inputs with successive squaring 
-module mod_exp(input [127:0] base, exp, mod, output [127:0] result);
+module mod_exp(input [127:0] base, exp, mod, output reg [127:0] result);
 	reg [127:0] temp_result, base_temp;
 	reg [127:0] exp_temp;
 	always @(*) begin
@@ -24,7 +24,7 @@ module mod_exp(input [127:0] base, exp, mod, output [127:0] result);
 			base_temp = (base_temp * base_temp) % mod;
 			exp_temp = exp_temp >> 1;
 		end
-		result = temp_result
+		result = temp_result;
 	end
 endmodule
 
