@@ -36,7 +36,7 @@ module montgomery_reduction(
 	input [127:0] N_prime, // -N^-1 mod R
 	output reg [127:0] result
 );
-	// R = 2^512 for 512 bit-width
+	// R = 2^127 for 128 bit-width
 	reg [127:0] m;
 	reg [255:0] t;
 	
