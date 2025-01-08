@@ -1,0 +1,116 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ .data          0x00000000        0x0 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ .bss           0x00000000        0x0 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ .comment       0x00000000       0x1c build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+LOAD /mnt/c/Users/jerem/desktop/flipperzero-firmware/toolchain/x86_64-linux/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libm.a
+LOAD /mnt/c/Users/jerem/desktop/flipperzero-firmware/toolchain/x86_64-linux/bin/../lib/gcc/arm-none-eabi/12.3.1/thumb/v7e-m+fp/hard/libgcc.a
+LOAD /mnt/c/Users/jerem/desktop/flipperzero-firmware/toolchain/x86_64-linux/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libstdc++_nano.a
+LOAD /mnt/c/Users/jerem/desktop/flipperzero-firmware/toolchain/x86_64-linux/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard/libsupc++_nano.a
+
+.text           0x00000000      0x2d4
+ *(.text)
+ *(.stub)
+ *(.text*)
+ .text.read_gpio_pins
+                0x00000000       0xe4 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x00000000                read_gpio_pins
+ .text.transmit_message
+                0x000000e4       0x98 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x000000e4                transmit_message
+ .text.render_gui
+                0x0000017c       0xac build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x0000017c                render_gui
+ .text.draw_callback
+                0x00000228        0xc build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x00000228                draw_callback
+ .text.flipper_transmission
+                0x00000234       0xa0 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x00000234                flipper_transmission
+ *(.text.*)
+ *(.text._*)
+ *(.init)
+ *(.fini)
+
+.rodata         0x000002d4      0x120
+ *(.rodata)
+ *(.rodata1)
+ *(.rodata.*)
+ .rodata.transmit_message.str1.4
+                0x000002d4       0x65 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ *fill*         0x00000339        0x3 
+ .rodata.render_gui.str1.4
+                0x0000033c       0x55 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ *fill*         0x00000391        0x3 
+ .rodata.flipper_transmission.str1.4
+                0x00000394       0x20 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ .rodata.LL_GPIO_PIN_LOOKUP
+                0x000003b4       0x40 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+                0x000003b4                LL_GPIO_PIN_LOOKUP
+
+.data
+ *(.data)
+ *(.data1)
+ *(.data.*)
+
+.bss
+ *(.bss)
+ *(.bss*)
+ *(.sbss)
+ *(.sbss*)
+ *(COMMON)
+
+.ARM.attributes
+                0x000003f4       0x34
+ *(.ARM.attributes)
+ .ARM.attributes
+                0x000003f4       0x34 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+ *(.ARM.attributes.*)
+
+/DISCARD/
+ *(.comment)
+ *(.comment.*)
+ *(.llvmbc)
+ *(.llvmcmd)
+OUTPUT(build/f7-firmware-D/.extapps/fpga_rsa_encryption_d.elf elf32-littlearm)
+LOAD linker stubs
+
+.debug_info     0x00000000      0xd4d
+ .debug_info    0x00000000      0xd4d build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_abbrev   0x00000000      0x31a
+ .debug_abbrev  0x00000000      0x31a build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_loclists
+                0x00000000      0x31e
+ .debug_loclists
+                0x00000000      0x31e build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_aranges  0x00000000       0x40
+ .debug_aranges
+                0x00000000       0x40 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_rnglists
+                0x00000000       0x54
+ .debug_rnglists
+                0x00000000       0x54 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_line     0x00000000      0x640
+ .debug_line    0x00000000      0x640 build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_str      0x00000000      0x85f
+ .debug_str     0x00000000      0x85f build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
+
+.debug_frame    0x00000000       0xcc
+ .debug_frame   0x00000000       0xcc build/f7-firmware-D/.extapps/fpga_rsa_encryption/flipper_transmission.o
