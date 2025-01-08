@@ -8,10 +8,12 @@
 #include "gui/gui.h"
 
 
+// Macro Constants
 #define FURI_CONFIG_THREAD_STACK_SIZE 1024
 #define FREQUENCY 433920000
 #define MESSAGE_LENGTH 8
 
+// Pin number to STM naming convention
 const uint32_t LL_GPIO_PIN_LOOKUP[] = {
     LL_GPIO_PIN_0, LL_GPIO_PIN_1, LL_GPIO_PIN_2, LL_GPIO_PIN_3,
     LL_GPIO_PIN_4, LL_GPIO_PIN_5, LL_GPIO_PIN_6, LL_GPIO_PIN_7,
@@ -19,13 +21,19 @@ const uint32_t LL_GPIO_PIN_LOOKUP[] = {
     LL_GPIO_PIN_12, LL_GPIO_PIN_13, LL_GPIO_PIN_14, LL_GPIO_PIN_15
 };
 
+// Struct for passing data on message
 typedef struct {
     uint8_t message[MESSAGE_LENGTH];
     bool transmitted;
 } GuiContext;
 
 /***
-*  Takes readings from 2 gpio pins for I2C communication.
+*  @brief Takes readings from 2 gpio pins for I2C communication.
+*  @param scl_pin the pin number for the clock for I2C
+*  @param sda_pin the pin number for the data transfer for I2C
+*  @param message the pointer to a size length array of ints to hold the encrypted message
+*  @param length the length of the array that message points to
+*
 */
 void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t length) {
 
@@ -85,7 +93,9 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
 
 
 /***
-* Takes message found in the GPIO pins and transmits it in 433.92 MHz radio
+* @brief Takes message found in the GPIO pins and transmits it in FREQUENCY
+* @param message the message that is to be transmitted
+* @param length the length of message
 */
 int transmit_message(uint8_t* message, size_t length) {
     if (length != MESSAGE_LENGTH) {
@@ -136,7 +146,7 @@ void render_gui(Canvas* canvas, GuiContext* context) {
     canvas_clear(canvas);
     canvas_draw_str(canvas, 0, 10, display_message);
     canvas_draw_str(canvas, 0, 30, context->transmitted ? "Status: Transmitted" : "Status: Ready");
-    canvas_draw_str(canvas, 0, 50, "Press OK to Transmit");
+    //canvas_draw_str(canvas, 0, 50, "Press OK to Transmit");
 }
 
 /***
