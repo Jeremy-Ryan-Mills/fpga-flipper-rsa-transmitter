@@ -63,8 +63,9 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
 
 
     while (byte_index < length) {
-        size_t timeout = 1000;
+        size_t timeout = 10000;
         // Wait for SCL to go high (clock synchronization)
+        // Wait for 10s to allow Arduino to run for testing or for FPGA to run
         while (!furi_hal_gpio_read(&scl) && timeout--) {
             furi_delay_ms(1);
         }
@@ -80,9 +81,11 @@ void read_gpio_pins(uint8_t scl_pin, uint8_t sda_pin, uint8_t* message, size_t l
             current_byte = 0;
             bit_index = 0;
         }
+        furi_delay_ms(5);
 
         // Wait for SCL to go low (end of clock cycle)
-        timeout = 1000;
+        // Reset timeout clock to 10s
+        timeout = 10000;
         while (furi_hal_gpio_read(&scl) && timeout--) {
             furi_delay_ms(1);
         }
