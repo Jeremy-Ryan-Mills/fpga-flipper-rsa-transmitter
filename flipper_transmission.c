@@ -7,6 +7,10 @@
 #include "furi_hal_subghz.h"
 #include "gui/gui.h"
 
+/***
+*  DEBUGGING BRANCH FOR I2C GPIO PIN READING
+*/
+
 
 // Macro Constants
 #define FURI_CONFIG_THREAD_STACK_SIZE 1024
