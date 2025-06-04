@@ -6,4 +6,4 @@ zero that reads the encrypted message from the Flipper's GPIO pins using a custo
 (Shiratech 96Board Mezzanine FPGA board) with an Intel Altera Max 10 FPGA. The FPGA will have code that encrypts a message that is received through specified pins (with the same communication protocol), and then
 encrypted with randomly generated 64 bit RSA keys. Testing and debugging is done with Arduino UNO.
 
-This is a personal project that I pursued to learn System Verilog, basic RF concepts, and learning the Flipper Zero firmware and hardware abstraction to build my own apps.
+This is a personal project that I pursued to learn Verilog, basic RF concepts, and learning the Flipper Zero firmware and hardware abstraction to build my own apps.
